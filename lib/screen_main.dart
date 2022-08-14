@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:sample_ui/custom_list_tile.dart';
-import 'package:sample_ui/search.dart';
 
-class ScreenMain extends StatelessWidget {
+class ScreenMain extends StatefulWidget {
   ScreenMain({Key? key}) : super(key: key);
 
-  List universityList = [
+  @override
+  State<ScreenMain> createState() => _ScreenMainState();
+}
+
+class _ScreenMainState extends State<ScreenMain> {
+  List<String> universityList = [
     "Bangalore University",
     "Mangalore University",
     "Amity University",
@@ -22,6 +26,11 @@ class ScreenMain extends StatelessWidget {
     "Thrissur University",
     "Kottayam University"
   ];
+
+  TextEditingController searchController = TextEditingController();
+
+  String searchText = '';
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -76,26 +85,45 @@ class ScreenMain extends StatelessWidget {
                             height: 30,
                           ),
                           TextField(
+                            decoration: const InputDecoration(
+                              hintText: "Search",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.teal)),
+                            ),
+                            controller: searchController,
+                            onChanged: (value) {
+                              setState(() {
+                                searchText = value;
+                              });
+                            },
                             focusNode: FocusNode(),
-                              onTap: () => showSearch(
-                                  context: context,
-                                  delegate: SearchScreen(universityList)),
-                              decoration: const InputDecoration(
-                                  hintText: "Search",
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.all(10))),
+                          ),
                           const SizedBox(
                             height: 20,
                           ),
                           Expanded(
-                            child: ListView.separated(
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) => CustomListTileWidget(name: universityList[index]), 
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                itemCount: universityList.length),
+                            child: Builder(builder: (context) {
+                              List<String> searchitems = universityList
+                                  .where((element) => element
+                                      .toLowerCase()
+                                      .contains(searchText.toLowerCase()))
+                                  .toList();
+
+                              if (searchitems.isEmpty) {
+                                return const Text("No University found!");
+                              }
+
+                              return ListView.separated(
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) =>
+                                      CustomListTileWidget(
+                                          name: searchitems[index]),
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                  itemCount: searchitems.length);
+                            }),
                           )
                         ],
                       ),
@@ -118,5 +146,3 @@ class ScreenMain extends StatelessWidget {
     );
   }
 }
-
-
